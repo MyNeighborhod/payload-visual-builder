@@ -1,0 +1,7 @@
+# Cursor AI Rules for payload-visual-builder
+
+- Always follow strict TypeScript type definitions in `src/types.ts`.
+- Ensure all custom visual builder blocks implement the Craft.js component contract (`craft` static property).
+- Keep plugin source code inside `src/` decoupled from the test harness in `dev/`.
+- Ensure compatibility with `@payloadcms/plugin-multi-tenant` and `@payloadcms/storage-s3`.
+- Read `docs/ai_agent_guide.md` before making architectural modifications.
