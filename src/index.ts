@@ -1,4 +1,4 @@
-import type { Config, Plugin } from "payload"
+import type { Config, Plugin, CollectionConfig } from "payload"
 import type { VisualBuilderPluginOptions } from "./types"
 
 export const visualBuilderPlugin =
@@ -15,7 +15,7 @@ export const visualBuilderPlugin =
       admin: {
         ...incomingConfig.admin,
       },
-      collections: (incomingConfig.collections || []).map((collection) => {
+      collections: (incomingConfig.collections || []).map((collection: CollectionConfig) => {
         if (!collections.includes(collection.slug)) {
           return collection
         }
