@@ -1,0 +1,14 @@
+{
+  "name": "@blockvibe/payload-visual-builder-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "build": "pnpm --filter @blockvibe/payload-visual-builder build",
+    "dev": "pnpm --filter dev dev",
+    "test": "pnpm exec tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
