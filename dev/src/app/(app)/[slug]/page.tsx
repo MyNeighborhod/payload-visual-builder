@@ -1,6 +1,7 @@
 import React from 'react'
 import { getPayload } from 'payload'
-import configPromise from '../../payload.config'
+import { notFound } from 'next/navigation'
+import configPromise from '../../../payload.config'
 
 function PageBlocks({ layout }: { layout: any[] }) {
   if (!layout || layout.length === 0) {
@@ -81,27 +82,24 @@ function PageBlocks({ layout }: { layout: any[] }) {
   )
 }
 
-export default async function HomePage() {
+export default async function DynamicSlugPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
   let pageDoc: any = null
+
   try {
     const payload = await getPayload({ config: configPromise })
     const pages = await payload.find({
       collection: 'pages',
-      where: { slug: { equals: 'home' } },
+      where: { slug: { equals: slug } },
       overrideAccess: true,
     })
     pageDoc = pages.docs[0]
   } catch (err) {
-    console.error('Error fetching home page doc:', err)
+    console.error(`Error fetching page doc for slug "${slug}":`, err)
   }
 
   if (!pageDoc) {
-    return (
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
-        <h1>BlockVibe Visual Builder Dev Harness</h1>
-        <p style={{ color: '#94a3b8' }}>Home page doc not yet seeded. Visit <a href="/admin" style={{ color: '#38bdf8' }}>/admin</a> to view CMS.</p>
-      </div>
-    )
+    notFound()
   }
 
   return (

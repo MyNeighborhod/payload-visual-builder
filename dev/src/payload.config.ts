@@ -27,6 +27,9 @@ export default buildConfig({
         tenantId = createdTenant.id
       }
 
+      const testEmail = process.env.TEST_USERNAME || "eugen@example.com"
+      const testPass = process.env.TEST_PASS || "helloWorld123"
+
       const users = await payload.find({ collection: "users", overrideAccess: true })
       if (users.docs.length > 0) {
         await payload.update({
@@ -47,8 +50,8 @@ export default buildConfig({
           collection: "users",
           overrideAccess: true,
           data: {
-            email: "eugen@example.com",
-            password: "helloWorld123",
+            email: testEmail,
+            password: testPass,
             role: "admin",
             tenants: [
               {
@@ -61,22 +64,96 @@ export default buildConfig({
       }
 
       const pages = await payload.find({ collection: "pages", overrideAccess: true })
-      if (pages.docs.length === 0) {
-        await payload.create({
-          collection: "pages",
-          overrideAccess: true,
-          data: {
-            title: "Home Page",
-            slug: "home",
-            tenant: tenantId,
-            layout: [
-              {
-                blockType: "hero",
-                title: "Welcome to Visual Page Builder",
-              },
-            ],
-          },
-        })
+      const existingSlugs = new Set(pages.docs.map((d: any) => d.slug))
+
+      const samplePages = [
+        {
+          title: "Home Page",
+          slug: "home",
+          layout: [
+            {
+              blockType: "hero",
+              title: "Welcome to BlockVibe Visual Page Builder",
+              subtitle: "Build beautiful, responsive PayloadCMS pages visually with Craft.js",
+              ctaText: "Explore Features",
+              ctaUrl: "/services",
+            },
+            {
+              blockType: "features",
+              title: "Core Features",
+              items: [
+                { title: "Drag-and-Drop Editing", description: "Craft.js powered visual editor for nested UI elements." },
+                { title: "PayloadCMS 3.0 Native", description: "Seamless integration with Payload Next.js App Router." },
+                { title: "Multi-Tenant Ready", description: "First-class tenant isolation and scoping built-in." },
+              ],
+            },
+          ],
+        },
+        {
+          title: "About Us",
+          slug: "about",
+          layout: [
+            {
+              blockType: "hero",
+              title: "About Our Platform",
+              subtitle: "Empowering content creators with real-time visual editing capabilities.",
+            },
+            {
+              blockType: "content",
+              heading: "Our Mission",
+              body: "We aim to bridge the gap between headless CMS flexibility and visual inline editing for modern web applications.",
+            },
+          ],
+        },
+        {
+          title: "Services & Solutions",
+          slug: "services",
+          layout: [
+            {
+              blockType: "hero",
+              title: "Our Services",
+              subtitle: "Comprehensive page building and site management solutions.",
+            },
+            {
+              blockType: "features",
+              title: "What We Offer",
+              items: [
+                { title: "Visual Page Builder Plugin", description: "Turn standard Payload blocks into dynamic visual trees." },
+                { title: "Custom Component Registration", description: "Extend the canvas with custom React components easily." },
+                { title: "S3 & Cloud Asset Support", description: "Direct media integration with S3/MinIO cloud storage." },
+              ],
+            },
+          ],
+        },
+        {
+          title: "Contact Us",
+          slug: "contact",
+          layout: [
+            {
+              blockType: "hero",
+              title: "Get In Touch",
+              subtitle: "Have questions about the visual page builder? Reach out to our team.",
+            },
+            {
+              blockType: "content",
+              heading: "Contact Information",
+              body: "Email: support@blockvibe.io | Documentation: docs/architecture.md",
+            },
+          ],
+        },
+      ]
+
+      for (const pageDoc of samplePages) {
+        if (!existingSlugs.has(pageDoc.slug)) {
+          await payload.create({
+            collection: "pages",
+            overrideAccess: true,
+            data: {
+              ...pageDoc,
+              tenant: tenantId,
+            },
+          })
+        }
       }
     } catch (err) {
       console.error("Error running dev seed in onInit:", err)
