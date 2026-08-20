@@ -1,10 +1,19 @@
 {
-  "name": "@blockvibe/payload-visual-builder-monorepo",
+  "name": "@blockvibe/payload-visual-builder",
   "version": "0.1.0",
   "private": true,
   "license": "MIT",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    }
+  },
   "scripts": {
-    "build": "pnpm --filter @blockvibe/payload-visual-builder build",
+    "build": "tsc",
     "dev": "pnpm --filter dev dev",
     "test": "pnpm exec tsc --noEmit"
   },

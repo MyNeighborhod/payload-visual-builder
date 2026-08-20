@@ -38,15 +38,29 @@ export default buildConfig({
 
 ## Development Harness (`dev/`)
 
-To run the isolated Payload 3.0 test harness locally:
+To run the isolated Payload 3.0 test harness locally with Docker Compose:
 
-```bash
-cd dev
-pnpm install
-pnpm dev
+1. **Start Local Database** (runs Postgres on standard port `5432` by default):
+   ```bash
+   docker compose up -d
+   ```
+
+2. **Start Dev App** (runs Next.js/Payload on standard port `3000` by default):
+   ```bash
+   pnpm dev
+   ```
+
+Open `http://localhost:3000` (or `http://localhost:3000/admin`) to test the visual builder in action.
+
+### Custom Ports (`.env`)
+To avoid port conflicts with other local projects, copy `.env.example` to `.env` and set your custom ports:
+```env
+PORT=3010
+POSTGRES_PORT=5433
+DATABASE_URI=postgres://postgres:postgres@127.0.0.1:5433/payload_dev
 ```
 
-Open `http://localhost:3000` to test the visual builder in action.
+
 
 ---
 

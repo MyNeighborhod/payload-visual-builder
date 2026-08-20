@@ -6,9 +6,81 @@ import { s3Storage } from "@payloadcms/storage-s3"
 import { visualBuilderPlugin } from "@blockvibe/payload-visual-builder"
 
 export default buildConfig({
-  serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL || "http://localhost:3000",
+  secret: process.env.PAYLOAD_SECRET || "dev-secret-key-12345",
+  serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL || `http://localhost:${process.env.PORT || "3000"}`,
   admin: {
     user: "users",
+  },
+  onInit: async (payload) => {
+    try {
+      const tenants = await payload.find({ collection: "tenants", overrideAccess: true })
+      let tenantId = tenants.docs[0]?.id
+      if (!tenantId) {
+        const createdTenant = await payload.create({
+          collection: "tenants",
+          overrideAccess: true,
+          data: {
+            name: "Default Tenant",
+            slug: "default",
+          },
+        })
+        tenantId = createdTenant.id
+      }
+
+      const users = await payload.find({ collection: "users", overrideAccess: true })
+      if (users.docs.length > 0) {
+        await payload.update({
+          collection: "users",
+          id: users.docs[0].id,
+          overrideAccess: true,
+          data: {
+            tenants: [
+              {
+                tenant: tenantId,
+                roles: ["admin"],
+              },
+            ],
+          },
+        })
+      } else {
+        await payload.create({
+          collection: "users",
+          overrideAccess: true,
+          data: {
+            email: "eugen@example.com",
+            password: "helloWorld123",
+            role: "admin",
+            tenants: [
+              {
+                tenant: tenantId,
+                roles: ["admin"],
+              },
+            ],
+          },
+        })
+      }
+
+      const pages = await payload.find({ collection: "pages", overrideAccess: true })
+      if (pages.docs.length === 0) {
+        await payload.create({
+          collection: "pages",
+          overrideAccess: true,
+          data: {
+            title: "Home Page",
+            slug: "home",
+            tenant: tenantId,
+            layout: [
+              {
+                blockType: "hero",
+                title: "Welcome to Visual Page Builder",
+              },
+            ],
+          },
+        })
+      }
+    } catch (err) {
+      console.error("Error running dev seed in onInit:", err)
+    }
   },
   collections: [
     {
@@ -20,6 +92,25 @@ export default buildConfig({
           type: "select",
           options: ["admin", "editor", "user"],
           defaultValue: "admin",
+        },
+      ],
+    },
+    {
+      slug: "tenants",
+      admin: {
+        useAsTitle: "name",
+      },
+      fields: [
+        {
+          name: "name",
+          type: "text",
+          required: true,
+        },
+        {
+          name: "slug",
+          type: "text",
+          required: true,
+          index: true,
         },
       ],
     },
@@ -59,6 +150,7 @@ export default buildConfig({
       collections: {
         pages: {},
       },
+      userHasAccessToAllTenants: (user: any) => user?.role === "admin",
     }),
     s3Storage({
       collections: {},
